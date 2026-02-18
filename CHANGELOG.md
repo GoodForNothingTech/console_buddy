@@ -1,3 +1,15 @@
+## Console Buddy 0.1.9 (February 17, 2026) ##
+
+* Progress Bar Frozen Object Fix
+- Fixed startup crash caused by `progress_bar` gem attempting to patch frozen `Enumerable` modules via `ObjectSpace`. The require is now rescued gracefully so startup continues in Rails apps with frozen modules.
+
+* Improved Error Logging
+- Startup error handler now includes a backtrace (first 5 lines) for easier debugging.
+- Fixed typo in error message: "encountered an during" -> "encountered an error during".
+
+* Version Bump
+- Bumped version to 0.1.9.
+
 ## Console Buddy 0.1.8 (February 17, 2026) ##
 
 * Sidekiq Job Inclusion Fix

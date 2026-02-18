@@ -193,7 +193,7 @@ module ConsoleBuddy
     def start_buddy_in_irb
       if defined? IRB::ExtendCommandBundle
         IRB::ExtendCommandBundle.include(ConsoleBuddy::IRB)
-        require 'progress_bar/core_ext/enumerable_with_progress'
+        load_progress_bar
       end
     end
 
@@ -202,8 +202,15 @@ module ConsoleBuddy
     def start_buddy_in_rails
       if defined? Rails::ConsoleMethods
         Rails::ConsoleMethods.include(ConsoleBuddy::IRB)
-        require 'progress_bar/core_ext/enumerable_with_progress'
+        load_progress_bar
       end
+    end
+
+    def load_progress_bar
+      require 'progress_bar/core_ext/enumerable_with_progress'
+    rescue StandardError
+      # progress_bar iterates all Enumerable-including modules via ObjectSpace
+      # and fails if any are frozen, which is common in Rails apps
     end
 
     # This will add the buddy methods to the Byebug console
