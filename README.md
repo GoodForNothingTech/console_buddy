@@ -211,10 +211,8 @@ There is a number of built in console methods and other tools that you can use o
 ### `table_print(data, options = {})`
 Prints a tabular view of a collection (e.g., ActiveRecord objects) to the console using **TablePrint**.
 
-**Usage**  
+**Usage**
 ```ruby
-> ConsoleBuddy::Report.table_print(User.all, "username")
-# or
 > table_print(User.all, "username")
 ```
 
@@ -223,11 +221,8 @@ Prints a tabular view of a collection (e.g., ActiveRecord objects) to the consol
 ### `table_for(rows, headers = [])`
 Renders a table from an array of arrays, optionally with column headers, using Terminal::Table
 
-**Usage**  
+**Usage**
 ```ruby
-> ConsoleBuddy::Report.table_for([["foo", "bar"], ["baz", "qux"]], ["col1", "col2"])
-
-# or
 > table_for([["foo", "bar"], ["baz", "qux"]], ["col1", "col2"])
 ```
 
