@@ -86,7 +86,10 @@ module ConsoleBuddy
         start_buddy_in_byebug
         puts "ConsoleBuddy session started! Debugger: #{use_in_debuggers} | Test: #{current_env}" if verbose_console
       rescue ::StandardError => error
-        puts "ConsoleBuddy encountered an during startup. [Error]: #{error.message}" unless ignore_startup_errors
+        unless ignore_startup_errors
+          puts "ConsoleBuddy encountered an error during startup. [Error]: #{error.message}"
+          puts error.backtrace.first(5).join("\n")
+        end
       end
     end
 

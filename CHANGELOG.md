@@ -1,3 +1,15 @@
+## Console Buddy 0.1.8 (February 17, 2026) ##
+
+* Sidekiq Job Inclusion Fix
+- Fixed Sidekiq job inclusion to support both `Sidekiq::Job` and `Sidekiq::Worker` based on availability.
+
+* Gemspec Updates
+- Updated repository URLs to point to the new GoodForNothingTech organization.
+- Added additional author email.
+
+* Version Bump
+- Bumped version to 0.1.8.
+
 ## Console Buddy 0.1.7 (June 23, 2025) ##
 
 * Conditionally Gem Loading
