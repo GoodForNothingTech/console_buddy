@@ -1,3 +1,14 @@
+## Console Buddy 0.1.10 (February 17, 2026) ##
+
+* Sidekiq Worker Inclusion Fix
+- Fixed `wrong argument type Class (expected Module)` error when using Sidekiq 5.x. The inclusion now prefers `Sidekiq::Worker` (a Module in all versions) over `Sidekiq::Job`, which may be defined as a Class by other gems or the host app.
+
+* Documentation Fix
+- Removed incorrect `ConsoleBuddy::Report.table_print` and `ConsoleBuddy::Report.table_for` examples from inline comments and README. These are instance methods available directly in the console session.
+
+* Version Bump
+- Bumped version to 0.1.10.
+
 ## Console Buddy 0.1.9 (February 17, 2026) ##
 
 * Progress Bar Frozen Object Fix

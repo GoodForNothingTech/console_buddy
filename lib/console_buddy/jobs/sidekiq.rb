@@ -8,7 +8,7 @@ require_relative "../one_off_job"
 module ConsoleBuddy
   module Jobs
     class Sidekiq
-      include(defined?(::Sidekiq::Job) ? ::Sidekiq::Job : ::Sidekiq::Worker)
+      include(defined?(::Sidekiq::Worker) ? ::Sidekiq::Worker : ::Sidekiq::Job)
 
       def perform(*args)
         ::ConsoleBuddy::OneOffJob.perform(*args)
