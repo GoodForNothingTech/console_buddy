@@ -16,8 +16,8 @@ Gem::Specification.new do |spec|
 
   spec.metadata = {
     "bug_tracker_uri"   => "https://github.com/GoodForNothingTech/console_buddy/issues",
-    "changelog_uri"     => "https://github.com/GoodForNothingTech/console_buddy/CHANGELOG.md",
-    "documentation_uri" => "https://github.com/GoodForNothingTech/console_buddy",
+    "changelog_uri"     => "https://github.com/GoodForNothingTech/console_buddy/blob/main/CHANGELOG.md",
+    "documentation_uri" => "https://github.com/GoodForNothingTech/console_buddy/blob/main/README.md",
     "source_code_uri"   => "https://github.com/GoodForNothingTech/console_buddy",
   }
 
