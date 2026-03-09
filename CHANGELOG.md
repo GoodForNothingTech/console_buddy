@@ -1,3 +1,12 @@
+## Console Buddy 0.1.11 (March 8, 2026) ##
+
+* Directory loading improvement for rails 7.2+
+- Improve .console_buddy directory handling and loading logic for better compatibility with Rails and Pry
+
+
+* Version Bump
+- Bumped version to 0.1.11.
+
 ## Console Buddy 0.1.10 (February 17, 2026) ##
 
 * Sidekiq Worker Inclusion Fix

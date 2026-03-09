@@ -2,16 +2,8 @@
 
 require 'pathname'
 
-# Check if .console_buddy directory exists
-def console_buddy_directory_exists?
-  console_buddy_path = Pathname.new(File.join(Dir.pwd, '.console_buddy'))
-  console_buddy_path.exist? && console_buddy_path.directory?
-end
-
-if !console_buddy_directory_exists?
-  return
-end
-
+# Always load the module; .console_buddy existence is checked in start! when Rails.root is set
+# (Rails 7.2 / Spring can require gems before Rails.root is available)
 require 'active_support'
 require 'active_support/all'
 
@@ -68,6 +60,8 @@ module ConsoleBuddy
     def start!
       # Initialize the default values
       set_config_defaults
+      # Require .console_buddy to exist (check here when Rails.root is set; avoids Rails 7.2 / Spring load-order issues)
+      return unless console_buddy_directory_exists?
       # Check if there is a .console_buddy/config file
       load_console_buddy_config
 
@@ -129,9 +123,22 @@ module ConsoleBuddy
       ENV['RAILS_ENV'] || ENV['RACK_ENV']
     end
 
+    # App root so .console_buddy is found under Rails (e.g. with Spring) or Dir.pwd
+    def console_buddy_root
+      if defined?(Rails) && Rails.respond_to?(:root) && Rails.root.present?
+        Pathname.new(Rails.root.to_s)
+      else
+        Pathname.new(Dir.pwd)
+      end
+    end
+
+    def console_buddy_directory_exists?
+      console_buddy_root.join('.console_buddy').exist? && console_buddy_root.join('.console_buddy').directory?
+    end
+
     # Loads the .console_buddy/config file if present
     def load_console_buddy_config
-      config_path = Pathname.new(File.join(Dir.pwd, '.console_buddy', 'config.rb'))
+      config_path = console_buddy_root.join('.console_buddy', 'config.rb')
       if config_path.exist? && config_path.file?
         require config_path.to_s
       else
@@ -142,7 +149,7 @@ module ConsoleBuddy
     # Loads all the files in the .console_buddy folder
     # .console_buddy folder should be in the root of the project
     def load_console_buddy_files
-      console_buddy_path = Pathname.new(File.join(Dir.pwd, '.console_buddy'))
+      console_buddy_path = console_buddy_root.join('.console_buddy')
       if console_buddy_path.exist? && console_buddy_path.directory?
         console_buddy_path.find do |path|
           next unless path.file?
@@ -188,6 +195,8 @@ module ConsoleBuddy
       end
     end
 
+    public :augment_classes, :augment_console
+
     # This will add the buddy methods to the IRB session
     # So that they can be called without instantiating the `ConsoleBuddy::Base` class
     def start_buddy_in_irb
@@ -203,6 +212,12 @@ module ConsoleBuddy
       if defined? Rails::ConsoleMethods
         Rails::ConsoleMethods.include(ConsoleBuddy::IRB)
         load_progress_bar
+      end
+      # Pry: ensure console methods are on the session's main object (before_session gets output, binding, pry)
+      if defined?(Pry)
+        Pry.config.hooks.add_hook(:before_session, :console_buddy) do |_output, binding, _pry|
+          binding.receiver.extend(ConsoleBuddy::IRB)
+        end
       end
     end
 

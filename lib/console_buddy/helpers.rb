@@ -21,6 +21,7 @@ module ConsoleBuddy
         if block_given?
           instance = ::ConsoleBuddy::Helpers::DSL.new
           instance.instance_eval(&block)
+          ConsoleBuddy.augment_console if ConsoleBuddy.respond_to?(:augment_console)
         end
       end
     end
