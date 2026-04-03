@@ -1,3 +1,12 @@
+## Console Buddy 0.1.12 (April 3, 2026) ##
+
+* Configurable Sidekiq queue for one-off jobs
+- Added `ConsoleBuddy.one_off_job_sidekiq_queue`. When set (e.g. in `.console_buddy/config.rb`), it is applied to `ConsoleBuddy::Jobs::Sidekiq.sidekiq_options` when the console starts, and `perform_async` enqueues using that queue.
+- Added `CONSOLE_BUDDY_SIDEKIQ_QUEUE` env support via Railtie so worker metadata is valid in Sidekiq/CI without relying on `rails console` to load `.console_buddy/config.rb`.
+
+* Version Bump
+- Bumped version to 0.1.12.
+
 ## Console Buddy 0.1.11 (March 8, 2026) ##
 
 * Directory loading improvement for rails 7.2+

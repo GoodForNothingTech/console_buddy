@@ -283,7 +283,35 @@ ConsoleBuddy.use_in_debuggers = true # When in a debugger like byebug should the
 ConsoleBuddy.ignore_startup_errors = false # Should warnings and errors be ignored?
 ConsoleBuddy.allowed_envs = ["development", "test"] # What RACK_ENV/RAILS_ENV do we want to use this in?
 ConsoleBuddy.one_off_job_service_type = :sidekiq # What background job gem do you use? :sidekiq, :resque, and :active_job are supported
+
+# When using Sidekiq, set a queue your workers listen to (required if the `default` queue is disallowed):
+ConsoleBuddy.one_off_job_sidekiq_queue = :general_2m # e.g. :general_15s, :slow_processing_30s, etc.
 ```
+
+### Sidekiq queue governance (invalid `default` queue)
+
+Some apps run a linter that rejects workers on Sidekiq’s `default` queue. `ConsoleBuddy::Jobs::Sidekiq` must therefore use one of your allowed queues. Choose **one** of these (they can all use the same queue name):
+
+1. **Environment variable** (works in every Rails process, including Sidekiq and CI, without duplicating `.console_buddy` load on boot):
+
+   ```bash
+   export CONSOLE_BUDDY_SIDEKIQ_QUEUE=general_2m
+   ```
+
+   Use a queue your workers already process (e.g. `general_15s`, `general_2m`, `slow_processing_30s`, or a specialty queue).
+
+2. **Rails initializer** (runs on boot so queue auditors see a valid queue):
+
+   ```ruby
+   # config/initializers/console_buddy_sidekiq.rb
+   Rails.application.config.to_prepare do
+     next unless defined?(ConsoleBuddy::Jobs::Sidekiq)
+
+     ConsoleBuddy::Jobs::Sidekiq.sidekiq_options queue: :general_2m
+   end
+   ```
+
+3. **`ConsoleBuddy.one_off_job_sidekiq_queue` in `.console_buddy/config.rb`** — applied when `rails console` runs `ConsoleBuddy.start!`. Pair this with (1) or (2) if jobs or linters load the worker outside the console.
 
 ## Development
 
