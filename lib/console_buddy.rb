@@ -51,7 +51,8 @@ end
 
 module ConsoleBuddy
   class << self
-    attr_accessor :verbose_console, :allowed_envs, :use_in_debuggers, :ignore_startup_errors, :use_in_tests, :one_off_job_service_type
+    attr_accessor :verbose_console, :allowed_envs, :use_in_debuggers, :ignore_startup_errors, :use_in_tests, :one_off_job_service_type,
+                  :one_off_job_sidekiq_queue
 
     def store
       @store ||= ::ConsoleBuddy::MethodStore.new
@@ -64,6 +65,7 @@ module ConsoleBuddy
       return unless console_buddy_directory_exists?
       # Check if there is a .console_buddy/config file
       load_console_buddy_config
+      apply_sidekiq_queue_to_worker
 
       # Only start the buddy in the allowed environments. e.g. development, test
       return if !allowed_env?
@@ -100,6 +102,7 @@ module ConsoleBuddy
       @ignore_startup_errors = false
       @allowed_envs = %w[development test]
       @one_off_job_service_type = :inline
+      @one_off_job_sidekiq_queue = nil
     end
 
     # Only start the buddy in the allowed environments
@@ -144,6 +147,16 @@ module ConsoleBuddy
       else
         puts ".console_buddy/config file not found."
       end
+    end
+
+    # Sync Sidekiq worker metadata so queue auditors and Sidekiq see a real queue (not the default queue).
+    def apply_sidekiq_queue_to_worker
+      return unless defined?(::ConsoleBuddy::Jobs::Sidekiq)
+
+      q = ConsoleBuddy.one_off_job_sidekiq_queue
+      return if q.blank?
+
+      ::ConsoleBuddy::Jobs::Sidekiq.sidekiq_options queue: q.to_sym
     end
 
     # Loads all the files in the .console_buddy folder
