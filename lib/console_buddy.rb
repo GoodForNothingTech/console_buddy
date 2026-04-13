@@ -14,45 +14,19 @@ require_relative "console_buddy/helpers"
 require_relative "console_buddy/irb"
 require_relative "console_buddy/version"
 
-require_relative "console_buddy/one_off_job"
-require_relative "console_buddy/job"
-
 rspec_present = false
-# Only load the one-off job classes if the gems are installed
-# 
-begin
-  require 'sidekiq'
-  require_relative "console_buddy/jobs/sidekiq"
-rescue LoadError
-  # puts "Sidekiq gem not installed, skipping sidekiq job integration."
-end
-
-begin
-  require 'resque'
-  require_relative "console_buddy/jobs/resque"
-rescue LoadError
-  # puts "Resque gem not installed, skipping resque job integration."
-end
-
-begin
-  require 'activejob'
-  require_relative "console_buddy/jobs/active_job"
-rescue LoadError
-  # puts "ActiveJob gem not installed, skipping active job integration."
-end
 
 begin
   require 'rspec'
   rspec_present = true
 rescue LoadError
   rspec_present = false
-  # puts "RSpec gem not installed, skipping rspec integration."
 end
 
 module ConsoleBuddy
   class << self
     attr_accessor :verbose_console, :allowed_envs, :use_in_debuggers, :ignore_startup_errors, :use_in_tests, :one_off_job_service_type,
-                  :one_off_job_sidekiq_queue
+                  :one_off_job_sidekiq_queue, :enable_one_off_jobs
 
     def store
       @store ||= ::ConsoleBuddy::MethodStore.new
@@ -65,7 +39,7 @@ module ConsoleBuddy
       return unless console_buddy_directory_exists?
       # Check if there is a .console_buddy/config file
       load_console_buddy_config
-      apply_sidekiq_queue_to_worker
+      load_one_off_job_integrations
 
       # Only start the buddy in the allowed environments. e.g. development, test
       return if !allowed_env?
@@ -101,6 +75,7 @@ module ConsoleBuddy
       @use_in_debuggers = false
       @ignore_startup_errors = false
       @allowed_envs = %w[development test]
+      @enable_one_off_jobs = false
       @one_off_job_service_type = :inline
       @one_off_job_sidekiq_queue = nil
     end
@@ -147,6 +122,38 @@ module ConsoleBuddy
       else
         puts ".console_buddy/config file not found."
       end
+    end
+
+    # Loads one-off job integration files and syncs Sidekiq options.
+    # Only runs when enable_one_off_jobs is true in config.
+    def load_one_off_job_integrations
+      return unless enable_one_off_jobs
+
+      require_relative "console_buddy/one_off_job"
+      require_relative "console_buddy/job"
+
+      begin
+        require 'sidekiq'
+        require_relative "console_buddy/jobs/sidekiq"
+      rescue LoadError
+        # Sidekiq gem not installed, skipping sidekiq job integration.
+      end
+
+      begin
+        require 'resque'
+        require_relative "console_buddy/jobs/resque"
+      rescue LoadError
+        # Resque gem not installed, skipping resque job integration.
+      end
+
+      begin
+        require 'activejob'
+        require_relative "console_buddy/jobs/active_job"
+      rescue LoadError
+        # ActiveJob gem not installed, skipping active job integration.
+      end
+
+      apply_sidekiq_queue_to_worker
     end
 
     # Sync Sidekiq worker metadata so queue auditors and Sidekiq see a real queue (not the default queue).

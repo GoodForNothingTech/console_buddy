@@ -1,3 +1,16 @@
+## Console Buddy 0.2.0 (April 13, 2026) ##
+
+* **[BREAKING]** One-off jobs disabled by default
+- `ConsoleBuddy::OneOffJob`, `ConsoleBuddy::Job`, and all background job adapter files (Sidekiq, Resque, ActiveJob) are no longer loaded at gem require time.
+- A new `ConsoleBuddy.enable_one_off_jobs` config flag (default: `false`) controls whether the feature is active. Set it to `true` in `.console_buddy/config.rb` to restore previous behaviour:
+  ```ruby
+  ConsoleBuddy.enable_one_off_jobs = true
+  ```
+- Apps that relied on one-off jobs without explicitly enabling this flag will have the feature silently disabled after upgrading. Update your `.console_buddy/config.rb` to opt in.
+
+* Version Bump
+- Bumped version to 0.2.0.
+
 ## Console Buddy 0.1.12 (April 3, 2026) ##
 
 * Configurable Sidekiq queue for one-off jobs

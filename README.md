@@ -266,11 +266,19 @@ Reads a CSV file and returns its rows as an array.
 ### OneOff BackgroundJobs
 This feature allows you to dynamically define and execute a process async using Sidekiq, ActiveJob or Resque. This is done 100% in the console.
 
+> **This feature is disabled by default.** You must opt in by setting `ConsoleBuddy.enable_one_off_jobs = true` in your `.console_buddy/config.rb`. Without this flag, none of the job integration files are loaded.
+
 **Usage**  
 ```ruby
 > ConsoleBuddy::OneOffJob.define { User.all.each { |x| x.do_long_running_thing } }
 > ConsoleBuddy::Job.perform_async
 ```
+
+#### Queue requirements
+
+When using Sidekiq, `ConsoleBuddy::Jobs::Sidekiq` enqueues work on the **`default`** queue unless you configure a different queue. **Your Sidekiq workers must be listening on a queue named `default`** for jobs to be picked up. If your app does not have a `default` queue, set a queue your workers already listen to using one of the options below — otherwise jobs will be enqueued but never processed.
+
+See the [Sidekiq queue governance](#sidekiq-queue-governance-invalid-default-queue) section for the available configuration options.
 
 ## Configurations and settings
 All of these settings are straight forward and do what you think they would do. So I won't go into to much detail:
@@ -282,9 +290,13 @@ ConsoleBuddy.use_in_tests = true # Do you want to load in your shortcuts and hel
 ConsoleBuddy.use_in_debuggers = true # When in a debugger like byebug should the console buddy context be loaded in?
 ConsoleBuddy.ignore_startup_errors = false # Should warnings and errors be ignored?
 ConsoleBuddy.allowed_envs = ["development", "test"] # What RACK_ENV/RAILS_ENV do we want to use this in?
+
+# One-off background jobs (disabled by default — must be explicitly enabled)
+ConsoleBuddy.enable_one_off_jobs = true # Set to true to load job integration files and enable this feature
 ConsoleBuddy.one_off_job_service_type = :sidekiq # What background job gem do you use? :sidekiq, :resque, and :active_job are supported
 
-# When using Sidekiq, set a queue your workers listen to (required if the `default` queue is disallowed):
+# When using Sidekiq, jobs are enqueued on the `default` queue unless overridden here.
+# Set this to a queue your workers already listen to if `default` is not available:
 ConsoleBuddy.one_off_job_sidekiq_queue = :general_2m # e.g. :general_15s, :slow_processing_30s, etc.
 ```
 

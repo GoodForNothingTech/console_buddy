@@ -2,7 +2,6 @@
 
 require_relative "csv"
 require_relative "http_request"
-require_relative "one_off_job"
 require_relative "report"
 
 module ConsoleBuddy
